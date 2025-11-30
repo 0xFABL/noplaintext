@@ -1,0 +1,21 @@
+{
+  "manifest_version": 3,
+  "name": "noplaintext",
+  "version": "1.0",
+  "description": "No more plain text storage.",
+  "permissions": [
+    "activeTab"
+  ],
+  "action": {
+    "default_popup": "popup.html"
+  },
+  "background": {
+    "service_worker": "service-worker.js"
+  },
+  "content_scripts": [
+    {
+      "matches": ["<all_urls>"],
+      "js": ["content.js"]
+    }
+  ]
+}
