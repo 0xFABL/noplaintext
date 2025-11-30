@@ -1,6 +1,6 @@
 // 1. Listen for messages from the Popup (via background/popup.js)
 
-const EXPECTED_SYMBOL_REGEX = '\$\<.+\>\$'
+const EXPECTED_SYMBOL_REGEX = /\$\<.*\>\$/;
 
 /**
  * Uses a TreeWalker to collect all meaningful text content from the DOM.
@@ -12,22 +12,22 @@ function collectAllPageText() {
 
   // 1. Create a filter function to determine which nodes to keep
   const textFilter = {
-      // Must accept a filter function
-      acceptNode: function(node) {
-        // Check if the text is meaningful (not just empty or whitespace)
-        if (node.nodeValue.trim() === '') {
-            return NodeFilter.FILTER_SKIP;
-        }
-        
-        // Check if the parent element is one we want to ignore
-        const parentTagName = node.parentElement.tagName;
-        if (['SCRIPT', 'STYLE', 'NOSCRIPT', 'IFRAME', 'BUTTON'].includes(parentTagName)) {
-            return NodeFilter.FILTER_SKIP;
-        }
-
-        // Accept the node
-        return NodeFilter.FILTER_ACCEPT;
+    // Must accept a filter function
+    acceptNode: function(node) {
+      // Check if the text is meaningful (not just empty or whitespace)
+      if (node.nodeValue.trim() === '') {
+          return NodeFilter.FILTER_SKIP;
       }
+      
+      // Check if the parent element is one we want to ignore
+      const parentTagName = node.parentElement.tagName;
+      if (['SCRIPT', 'STYLE', 'NOSCRIPT', 'IFRAME', 'BUTTON'].includes(parentTagName)) {
+          return NodeFilter.FILTER_SKIP;
+      }
+
+      // Accept the node
+      return NodeFilter.FILTER_ACCEPT;
+    }
   };
 
   // 2. Create the TreeWalker
@@ -50,7 +50,7 @@ function collectAllPageText() {
     // Push the text value, cleaning up extra whitespace
     allText.push(currentNode.nodeValue.trim().replace(/\s+/g, ' '));
   }
-
+  console.log(allText)
   // 4. Check if the text matches expected symbol regex.
   const matching_text = allText.filter((val) => {
     if (val.match(EXPECTED_SYMBOL_REGEX)) {
