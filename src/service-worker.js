@@ -18,8 +18,8 @@ const handle_decrypt_single = async (data) => {
   
   console.log(decrypted)
   return new EncryptDecryptMap(
-    encrypted=data,
-    decrypted=decrypted, // stub for actual implementation
+    data,
+    decrypted, // stub for actual implementation
   )
 } 
 
@@ -27,9 +27,10 @@ const handle_input_from_content = async (request, sender, sendResponse) => {
   const dataReceived = request.data;
   const senderUrl = sender.url;
   console.log(dataReceived);
-  const new_data = dataReceived.map(async (value) => {
-    return await handle_decrypt_single(value);
-  })
+  const new_data_promises = dataReceived.map((value) => {
+    return handle_decrypt_single(value);
+  });
+  const new_data = await Promise.all(new_data_promises);
 
   // send a new message to active tab
   chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
