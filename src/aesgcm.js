@@ -14,7 +14,7 @@ async function deriveKeyMaterialFromPassphrase(passphrase) {
 }
 
 async function generateKey(passphrase, salt_from_input) {
-  const keyMaterial = deriveKeyMaterialFromPassphrase(passphrase)
+  const keyMaterial = await deriveKeyMaterialFromPassphrase(passphrase)
 
   const salt = salt_from_input ? salt_from_input : crypto.getRandomValues(new Uint8Array(16)); 
   const key =  await crypto.subtle.deriveKey(
