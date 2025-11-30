@@ -20,7 +20,6 @@ document.getElementById('decrypt').addEventListener('click', () => {
 
 document.getElementById('input-box').addEventListener('change', () => {
   const messageText = document.getElementById('input-box').value; 
-  console.log("alksjdlkajs")
   chrome.runtime.sendMessage({
     command: 'setPassphrase',
     data: messageText

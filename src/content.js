@@ -2,6 +2,8 @@
 
 const EXPECTED_SYMBOL_REGEX = /\$\<.*\>\$/;
 
+let MATCHED_NODES = null;
+
 /**
  * Uses a TreeWalker to collect all meaningful text content from the DOM.
  * @returns {string} The collected text, separated by spaces.
@@ -16,13 +18,19 @@ function collectAllPageText() {
     acceptNode: function(node) {
       // Check if the text is meaningful (not just empty or whitespace)
       if (node.nodeValue.trim() === '') {
-          return NodeFilter.FILTER_SKIP;
+        return NodeFilter.FILTER_SKIP;
       }
       
       // Check if the parent element is one we want to ignore
       const parentTagName = node.parentElement.tagName;
       if (['SCRIPT', 'STYLE', 'NOSCRIPT', 'IFRAME', 'BUTTON'].includes(parentTagName)) {
-          return NodeFilter.FILTER_SKIP;
+        return NodeFilter.FILTER_SKIP;
+      }
+
+      // only keep ones which fit criterion.
+      const text_value = node.nodeValue.trim();
+      if (!text_value.match(EXPECTED_SYMBOL_REGEX)) {
+        return NodeFilter.FILTER_SKIP
       }
 
       // Accept the node
@@ -42,49 +50,59 @@ function collectAllPageText() {
       false // deprecated/ignored in modern browsers
   );
 
-  let allText = [];
-  let currentNode;
+  // let allText = [];
 
+  let matchNodes = [];
+  let currentNode;
   // 3. Traverse the tree and collect the text
   while (currentNode = walker.nextNode()) {
     // Push the text value, cleaning up extra whitespace
-    allText.push(currentNode.nodeValue.trim().replace(/\s+/g, ' '));
+    matchNodes.push(currentNode);
   }
-  console.log(allText)
-  // 4. Check if the text matches expected symbol regex.
-  const matching_text = allText.filter((val) => {
-    if (val.match(EXPECTED_SYMBOL_REGEX)) {
-      return true
-    }
-    return false
-  });
 
-  return matching_text
+  MATCHED_NODES = matchNodes;
+  // console.log(allText)
+  // // 4. Check if the text matches expected symbol regex.
+  // const matching_text = allText.filter((val) => {
+  //   if (val.match(EXPECTED_SYMBOL_REGEX)) {
+  //     return true
+  //   }
+  //   return false
+  // });
+}
+
+
+const handle_decrypt_event = (request, sender, sendResponse) => {
+  const inputData = request.data;
+  // console.log('Content Script received message from Popup:', inputData);
+
+  // Optional: Display confirmation on the current page
+  // alert(`Content Script received: "${inputData}". Now sending to Service Worker.`);
+
+  collectAllPageText();
+  console.log(MATCHED_NODES);
+
+  // // 2. Send the received data to the Service Worker
+  // chrome.runtime.sendMessage({
+  //   command: "inputFromContent",
+  //   data: inputData
+  // }, (response) => {
+  //   // 3. (Optional) Get a response back from the Service Worker
+  //   console.log('Response from Service Worker:', response);
+  // });
+
+  // Acknowledge receipt of the message
+  sendResponse({ status: "Content script processed popup message" });
+  return true; // Indicates asynchronous response
 }
 
 // connection
 chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
-  if (request.command === "inputFromPopup") {
-    const inputData = request.data;
-    // console.log('Content Script received message from Popup:', inputData);
-
-    // Optional: Display confirmation on the current page
-    alert(`Content Script received: "${inputData}". Now sending to Service Worker.`);
-
-    const scrapedData = collectAllPageText();
-    console.log(scrapedData);
-
-    // 2. Send the received data to the Service Worker
-    chrome.runtime.sendMessage({
-      command: "inputFromContent",
-      data: inputData
-    }, (response) => {
-      // 3. (Optional) Get a response back from the Service Worker
-      console.log('Response from Service Worker:', response);
-    });
-
-    // Acknowledge receipt of the message
-    sendResponse({ status: "Content script processed popup message" });
-    return true; // Indicates asynchronous response
-  }
+  switch(request.command) {
+    case "inputFromPopup": {
+      console.log("aaaa")
+      handle_decrypt_event(request, sender, sendResponse);
+      break;
+    }
+  };
 });
