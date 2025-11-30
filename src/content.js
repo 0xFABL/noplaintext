@@ -82,20 +82,13 @@ const handle_decrypt_event = (request, sender, sendResponse) => {
 
 const handle_replace_contents = (request, sender, sendResponse) => {
   // 3. (Optional) Get a response back from the Service Worker
-  console.log('Response from Service Worker:', request.data);
-  console.log('Response from Service Worker:', request.data);
   const data = request.data;
   const before_names = data.map((val) => val.encrypted);
   console.log(before_names)
   if (!MATCHED_NODES) {
     throw Error("MATCHED NODES IS NOT SET.");
   }
-  console.log(typeof MATCHED_NODES)
-  console.log(MATCHED_NODES)
   for (const node of MATCHED_NODES) {
-    console.log(typeof node)
-    console.log(node)
-    console.log(node.nodeValue)
     if (before_names.includes(node.nodeValue)) {
       // do something
       const match_map = data.find((val) => val.encrypted=node.nodeValue);
