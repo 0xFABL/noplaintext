@@ -1,45 +1,65 @@
 // https://gist.github.com/themikefuller/aca9491f960cbb8d94cdd7236698f0cd
+// https://developer.mozilla.org/en-US/docs/Web/API/SubtleCrypto/deriveKey
 
-async function generateKey() {
-  return await crypto.subtle.generateKey({
-    "name":"AES-GCM",
-    "length":256
-  },true,['encrypt','decrypt']);
+async function deriveKeyMaterialFromPassphrase(passphrase) {
+  let encoded = new TextEncoder().encode(passphrase);
+  let keyMaterial = window.crypto.subtle.importKey(
+    "raw",
+    encoded,
+    "PBKDF2",
+    false,
+    ["deriveBits", "deriveKey"],
+  )
+  return keyMaterial
 }
 
-async function exportKey(key) {
-  return await crypto.subtle.exportKey('jwk', key);
-}
+async function generateKey(passphrase, salt_from_input) {
+  const keyMaterial = deriveKeyMaterialFromPassphrase(passphrase)
 
-async function importKey(jwk) {
-  return await crypto.subtle.importKey('jwk', jwk, {
-    "name":"AES-GCM"
-  }, false, ['encrypt','decrypt']);
+  const salt = salt_from_input ? salt_from_input : crypto.getRandomValues(new Uint8Array(16)); 
+  const key =  await crypto.subtle.deriveKey(
+    {
+      name: "PBKDF2",
+      salt,
+      iterations: 100000,
+      hash: "SHA-256",
+      keyMaterial,
+    },
+    {name: "AES-GCM", length: 256},
+    true,
+    ["encrypt", "decrypt"]
+  );
+
+  return {key: key, salt: salt}
 }
 
 // returns dict
-async function encrypt(string,key) {
+async function encrypt(string, passphrase) {
   let encoded = new TextEncoder().encode(string);
   let iv = crypto.getRandomValues(new Uint8Array(12));
+
+  const {key, salt} = generateKey(passphrase);
   let encrypted = await crypto.subtle.encrypt({"name":"AES-GCM","iv":iv}, key, encoded);
-  return encrypted = {"encrypted":encrypted, "iv": iv};
+  return encrypted = {"encrypted":encrypted, "iv": iv, "salt": salt};
 }
 
 async function encrypted_to_base64(string,key) {
     let result = await encrypt(string, key)
-    const concatenated_bytes = result.encrypted + result.iv
+    const concatenated_bytes = result.iv + result.salt + result.encrypted;
     const b64_repr = concatenated_bytes.toBase64();
     return b64_repr
 }
 
-async function decrypt_from_b64_repr(data, key) {
+async function decrypt_from_b64_repr(data, passphrase) {
     const byte_arr = data.fromBase64();
     const iv = byte_arr.slice(0,11);
-    const encrypted = byte_arr.slice(12);
-    return decrypt(encrypted, iv, key);
+    const salt = byte_arr.slice(12, 27);
+    const encrypted = byte_arr.slice(28);
+    return decrypt(encrypted, iv, salt, passphrase);
 }
 
-async function decrypt(encrypted,iv, key) {
+async function decrypt(encrypted, iv, salt, passphrase) {
+  const { key } = generateKey(passphrase, salt);
   let decrypted = await crypto.subtle.decrypt({"name":"AES-GCM","iv":iv}, key, encrypted);
   let decoded = new TextDecoder().decode(decrypted);
   return decoded;
