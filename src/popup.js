@@ -1,4 +1,4 @@
-document.getElementById('send-button').addEventListener('click', () => {
+document.getElementById('decrypt').addEventListener('click', () => {
   const messageText = document.getElementById('input-box').value;
 
   // Query for the active tab
