@@ -78,13 +78,13 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
     console.log(scrapedData);
 
     // // 2. Send the received data to the Service Worker
-    // chrome.runtime.sendMessage({
-    //   command: "inputFromContent",
-    //   data: inputData
-    // }, (response) => {
-    //   // 3. (Optional) Get a response back from the Service Worker
-    //   console.log('Response from Service Worker:', response);
-    // });
+    chrome.runtime.sendMessage({
+      command: "inputFromContent",
+      data: inputData
+    }, (response) => {
+      // 3. (Optional) Get a response back from the Service Worker
+      console.log('Response from Service Worker:', response);
+    });
 
     // Acknowledge receipt of the message
     sendResponse({ status: "Content script processed popup message" });
