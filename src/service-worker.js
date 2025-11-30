@@ -1,6 +1,8 @@
 // Stubbed-out Service Worker
 console.log('Service Worker is running.');
 
+let passphrase = null;
+
 const handle_input_from_content = (request, sender, sendResponse) => {
   const dataReceived = request.data;
   const senderUrl = sender.url;
@@ -19,9 +21,24 @@ const handle_input_from_content = (request, sender, sendResponse) => {
   return true; // Indicates asynchronous response
 }
 
+const handle_set_passphrase = (request, sender, sendResponse) => {
+  const dataReceived = request.data;
+  const senderUrl = sender.url; 
+
+  passphrase = dataReceived;
+  console.log(`new passphrase ${passphrase}`);
+}
+
 // Listen for messages from any part of the extension (e.g., content.js)
 chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
-  if (request.command === "inputFromContent") {
-    handle_input_from_content(request, sender, sendResponse);
+  switch(request.command) {
+    case "inputFromContent": {
+      handle_input_from_content(request, sender, sendResponse);
+      break;
+    }
+    case "setPassphrase": {
+      handle_set_passphrase(request, sender, sendResponse);
+      break;
+    }
   }
 });

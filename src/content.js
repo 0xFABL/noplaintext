@@ -62,22 +62,19 @@ function collectAllPageText() {
   return matching_text
 }
 
-
-
-
 // connection
 chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
   if (request.command === "inputFromPopup") {
     const inputData = request.data;
     // console.log('Content Script received message from Popup:', inputData);
 
-    // // Optional: Display confirmation on the current page
+    // Optional: Display confirmation on the current page
     alert(`Content Script received: "${inputData}". Now sending to Service Worker.`);
 
     const scrapedData = collectAllPageText();
     console.log(scrapedData);
 
-    // // 2. Send the received data to the Service Worker
+    // 2. Send the received data to the Service Worker
     chrome.runtime.sendMessage({
       command: "inputFromContent",
       data: inputData
