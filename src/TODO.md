@@ -1,0 +1,7 @@
+- typescript
+- tidy up
+- function to highlight all potential values
+- replace all with encrypted
+- replace all with decrypted
+- replace without updating original value i.e. by injecting a new value ontop
+- in popup menu for formatted encryption and decryption
