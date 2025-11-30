@@ -50,8 +50,6 @@ function collectAllPageText() {
       false // deprecated/ignored in modern browsers
   );
 
-  // let allText = [];
-
   let matchNodes = [];
   let currentNode;
   // 3. Traverse the tree and collect the text
@@ -60,15 +58,8 @@ function collectAllPageText() {
     matchNodes.push(currentNode);
   }
 
+  // sets global variable.
   MATCHED_NODES = matchNodes;
-  // console.log(allText)
-  // // 4. Check if the text matches expected symbol regex.
-  // const matching_text = allText.filter((val) => {
-  //   if (val.match(EXPECTED_SYMBOL_REGEX)) {
-  //     return true
-  //   }
-  //   return false
-  // });
 }
 
 
@@ -82,18 +73,20 @@ const handle_decrypt_event = (request, sender, sendResponse) => {
   chrome.runtime.sendMessage({
     command: "inputFromContent",
     data: data,
-  }, (response) => {
-    handle_replace_contents(response.data);
-  });
+  }, (response) => {});
 
   // Acknowledge receipt of the message
   sendResponse({ status: "Content script processed popup message" });
   return true; // Indicates asynchronous response
 }
 
-const handle_replace_contents = (previous_to_new_map) => {
+const handle_replace_contents = (request, sender, sendResponse) => {
   // 3. (Optional) Get a response back from the Service Worker
-  console.log('Response from Service Worker:', response);
+  console.log('Response from Service Worker:', request.data);
+
+
+  sendResponse({ status: "done" });
+  return true;
 }
 
 // connection
@@ -101,6 +94,10 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
   switch(request.command) {
     case "inputFromPopup": {
       handle_decrypt_event(request, sender, sendResponse);
+      break;
+    }
+    case "inputFromDecryption": {
+      handle_replace_contents(request, sender, sendResponse);
       break;
     }
   };

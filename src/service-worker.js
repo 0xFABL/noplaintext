@@ -12,7 +12,7 @@ class EncryptDecryptMap {
 }
 
 const handle_decrypt_single = (data) => {
-  return EncryptDecryptMap(
+  return new EncryptDecryptMap(
     encrypted=data,
     decrypted="ALKSDJLADSJDASKLDJASL", // stub for actual implementation
   )
@@ -25,11 +25,23 @@ const handle_input_from_content = (request, sender, sendResponse) => {
   const new_data = dataReceived.map((value) => {
     return handle_decrypt_single(value);
   })
+
+  // send a new message to active tab
+  chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
+    if (tabs.length > 0) {
+      const activeTabId = tabs[0].id;
+      
+      // Send a message to the content script in the active tab
+      chrome.tabs.sendMessage(activeTabId, {
+        command: "inputFromDecryption",
+        data: new_data
+      }, (response) => {});
+    }
+  });
+
   
   // Send a response back to the sender (content.js)
-  sendResponse({ 
-    data: new_data
-  });
+  sendResponse("ok");
 
   return true; // Indicates asynchronous response
 }
