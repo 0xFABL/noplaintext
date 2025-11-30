@@ -5,3 +5,4 @@
 - replace all with decrypted
 - replace without updating original value i.e. by injecting a new value ontop
 - in popup menu for formatted encryption and decryption
+- exclude $<>$ from the encryption/decryption process but is needed for formatting :)
