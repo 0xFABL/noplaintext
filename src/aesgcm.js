@@ -54,7 +54,8 @@ async function encrypted_to_base64(string, passphrase) {
 }
 
 async function decrypt_from_b64_repr(data, passphrase) {
-    const byte_arr = data.fromBase64();
+    const symbols_removed = data.slice(2, data.length-2);
+    const byte_arr = atob(symbols_removed); // from b64
     const iv = byte_arr.slice(0,11);
     const salt = byte_arr.slice(12, 27);
     const encrypted = byte_arr.slice(28);
