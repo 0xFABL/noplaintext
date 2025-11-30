@@ -3,28 +3,40 @@ console.log('Service Worker is running.');
 
 let passphrase = null;
 
+
+class EncryptDecryptMap {
+  constructor(encrypted, decrypted) {
+    this.encrypted = encrypted;
+    this.decrypted = decrypted;
+  }
+}
+
+const handle_decrypt_single = (data) => {
+  return EncryptDecryptMap(
+    encrypted=data,
+    decrypted="ALKSDJLADSJDASKLDJASL", // stub for actual implementation
+  )
+} 
+
 const handle_input_from_content = (request, sender, sendResponse) => {
   const dataReceived = request.data;
   const senderUrl = sender.url;
-
-  console.log('--- Service Worker Received Data ---');
-  console.log(`Source URL: ${senderUrl}`);
-  console.log(`Received Data: ${dataReceived}`);
-  console.log('------------------------------------');
-
-  // **STUBBED FUNCTIONALITY GOES HERE**
-  // e.g., Save to storage, make an API call, etc.
-  // For this example, we just log and send a simple response.
+  console.log(dataReceived);
+  const new_data = dataReceived.map((value) => {
+    return handle_decrypt_single(value);
+  })
   
   // Send a response back to the sender (content.js)
-  sendResponse({ status: "Service Worker received and logged the data." });
+  sendResponse({ 
+    data: new_data
+  });
+
   return true; // Indicates asynchronous response
 }
 
 const handle_set_passphrase = (request, sender, sendResponse) => {
   const dataReceived = request.data;
   const senderUrl = sender.url; 
-
   passphrase = dataReceived;
   console.log(`new passphrase ${passphrase}`);
 }
