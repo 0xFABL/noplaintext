@@ -3,7 +3,7 @@
 
 async function deriveKeyMaterialFromPassphrase(passphrase) {
   let encoded = new TextEncoder().encode(passphrase);
-  let keyMaterial = window.crypto.subtle.importKey(
+  let keyMaterial = crypto.subtle.importKey(
     "raw",
     encoded,
     "PBKDF2",
@@ -23,8 +23,8 @@ async function generateKey(passphrase, salt_from_input) {
       salt,
       iterations: 100000,
       hash: "SHA-256",
-      keyMaterial,
     },
+    keyMaterial,
     {name: "AES-GCM", length: 256},
     true,
     ["encrypt", "decrypt"]
