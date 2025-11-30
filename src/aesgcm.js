@@ -47,7 +47,7 @@ async function encrypted_to_base64(string, passphrase) {
     const concatenated_bytes = new Uint8Array([
       ...result.iv,
       ...result.salt,
-      ...result.encrypted,
+      ...new Uint8Array(result.encrypted),
     ]);
     const b64_repr = concatenated_bytes.toBase64();
     return b64_repr

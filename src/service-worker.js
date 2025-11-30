@@ -23,12 +23,12 @@ const handle_decrypt_single = async (data) => {
   )
 } 
 
-const handle_input_from_content = (request, sender, sendResponse) => {
+const handle_input_from_content = async (request, sender, sendResponse) => {
   const dataReceived = request.data;
   const senderUrl = sender.url;
   console.log(dataReceived);
-  const new_data = dataReceived.map((value) => {
-    return handle_decrypt_single(value);
+  const new_data = dataReceived.map(async (value) => {
+    return await handle_decrypt_single(value);
   })
 
   // send a new message to active tab
@@ -59,10 +59,10 @@ const handle_set_passphrase = (request, sender, sendResponse) => {
 }
 
 // Listen for messages from any part of the extension (e.g., content.js)
-chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
+chrome.runtime.onMessage.addListener(async (request, sender, sendResponse) => {
   switch(request.command) {
     case "inputFromContent": {
-      handle_input_from_content(request, sender, sendResponse);
+      await handle_input_from_content(request, sender, sendResponse);
       break;
     }
     case "setPassphrase": {
