@@ -3,6 +3,8 @@ console.log('Service Worker is running.');
 
 let passphrase = null;
 
+import { encrypted_to_base64 } from './aesgcm.js';
+
 
 class EncryptDecryptMap {
   constructor(encrypted, decrypted) {
@@ -11,10 +13,13 @@ class EncryptDecryptMap {
   }
 }
 
-const handle_decrypt_single = (data) => {
+const handle_decrypt_single = async (data) => {
+  const decrypted = await encrypted_to_base64(data, passphrase);
+  
+  console.log(decrypted)
   return new EncryptDecryptMap(
     encrypted=data,
-    decrypted="ALKSDJLADSJDASKLDJASL", // stub for actual implementation
+    decrypted=decrypted, // stub for actual implementation
   )
 } 
 
