@@ -15,7 +15,6 @@ async function deriveKeyMaterialFromPassphrase(passphrase) {
 
 async function generateKey(passphrase, salt_from_input) {
   const keyMaterial = await deriveKeyMaterialFromPassphrase(passphrase)
-
   const salt = salt_from_input ? salt_from_input : crypto.getRandomValues(new Uint8Array(16)); 
   const key =  await crypto.subtle.deriveKey(
     {
@@ -29,8 +28,8 @@ async function generateKey(passphrase, salt_from_input) {
     true,
     ["encrypt", "decrypt"]
   );
-
-  return {key: key, salt: salt}
+  console.log(key)
+  return {"key": key, "salt": salt}
 }
 
 // returns dict
@@ -38,13 +37,13 @@ async function encrypt(string, passphrase) {
   let encoded = new TextEncoder().encode(string);
   let iv = crypto.getRandomValues(new Uint8Array(12));
 
-  const {key, salt} = generateKey(passphrase);
+  const {key, salt}= await generateKey(passphrase);
   let encrypted = await crypto.subtle.encrypt({"name":"AES-GCM","iv":iv}, key, encoded);
   return encrypted = {"encrypted":encrypted, "iv": iv, "salt": salt};
 }
 
-async function encrypted_to_base64(string,key) {
-    let result = await encrypt(string, key)
+async function encrypted_to_base64(string, passphrase) {
+    let result = await encrypt(string, passphrase)
     const concatenated_bytes = result.iv + result.salt + result.encrypted;
     const b64_repr = concatenated_bytes.toBase64();
     return b64_repr
@@ -59,7 +58,7 @@ async function decrypt_from_b64_repr(data, passphrase) {
 }
 
 async function decrypt(encrypted, iv, salt, passphrase) {
-  const { key } = generateKey(passphrase, salt);
+  const { key } = await generateKey(passphrase, salt);
   let decrypted = await crypto.subtle.decrypt({"name":"AES-GCM","iv":iv}, key, encrypted);
   let decoded = new TextDecoder().decode(decrypted);
   return decoded;
